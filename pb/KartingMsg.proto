@@ -1,0 +1,201 @@
+package com.game.karting;
+//index:下注区域，取值：1-8，代表八种车
+
+//玩家登录回包
+//table_status取值：
+//0x41,                //等待
+//0x42,                //下注
+//0x43,                //开奖
+//0x44,                //结算
+
+message BettingZone
+{
+	required int32 index = 1;
+	required int32 totalgold = 2;//所有玩家下注总数
+	required int32 gold = 3;	//当前玩家下注数
+}
+
+message UserInfo
+{
+    required int32 userid = 1;  //
+    required string info = 2;   //用户完整信息
+    required int32 totalwin = 3;//总输赢
+}
+
+//0x40游戏场景
+message GameSceneResponse 
+{
+	required int32 tableid = 1;
+    required int32 tablestatus = 2;		//游戏状态
+    required int32 userid = 3;
+    required int32 userstatus = 4;      //玩家状态，1重连，2动态加入
+	required int32 timeout = 5;			//倒计时时间
+	required int32 players = 6;			//当前房间人数
+    repeated int32 limit = 7;           //下注上限，只在下注阶段关注此值
+	required UserInfo dealer = 8;		//庄家id，如果是0，表示目前没人上庄,info为空
+    required int32 lianzhuang = 9;      //连庄
+    required int32 index = 10;          //开奖结果
+    required int32 dealertotalwin = 11; //庄家总输赢
+    repeated int32 indexlist = 12;      //开奖历史记录
+	repeated BettingZone bettingzone = 13;
+    required int32 visiable = 14;            //用于判断哪个按钮能亮
+}
+
+//0x31
+//广播游戏准备开始
+message GameReadyStartBroadcast
+{
+	required int32 tableid = 1;
+	required int32 timeout = 2;
+}
+
+//0x32
+//广播游戏开始
+message GameStartBroadcast
+{
+	required int32 tableid = 1;
+	required int32 timeout = 2;			//下注超时
+    required int32 dealer = 3;
+	repeated int32 limit = 4;			//下注上限，计算的是庄家的金币,前端需要用自己的金币和此数值比较
+    required int32 lianzhuang = 5;      //连庄局数
+}
+
+//0x33
+//玩家上庄请求
+message UserZhuangRequest
+{
+	required int32 type = 1;	//类型，1上庄，2下庄
+}
+
+//0x33
+//上庄回复
+message UserZhuangResponse
+{
+	required int32 tableid = 1;
+	required int32 userid = 2;
+	required int32 result = 3;					//上庄结果，-1 失败，1 成功
+    required int32 type = 4;                    //类型：1上庄，2下庄
+    required string msg = 5;                    //消息
+	repeated UserInfo zhuanglist = 6;		    //目前上庄玩家列表
+}
+
+//0x34
+//确定庄家广播
+message ComfirmZhuangBroadcast
+{
+	required int32 tableid = 1;
+	required UserInfo dealer = 2;
+}
+
+//0x35
+//玩家请求下注 1004
+message UserBettingRequest
+{
+	required int32 jetton = 1;					//下注金额
+	required int32 index = 2;					//在哪个区域下注 1 - 8
+}
+
+
+//0x35
+//下注广播
+message UserBettingBroadcast
+{
+	required int32 tableid = 1;
+	required int32 userid = 2;
+	required int32 jetton = 3;				//下注金额
+	required int32 index = 4;				//下注区域
+	required int32 gold = 5;				//下完注剩余金币
+	repeated int32 limit = 6;				//下注上限
+	required int32 result = 7;				//下注是否成功 1成功，-1失败
+	required string msg = 8;				//下注失败信息
+	repeated BettingZone data = 9;		    //每个下注区域下注情况
+    required int32 visiable = 10;            //用于判断哪个按钮能亮
+}
+
+//0x36
+//广播开奖结果
+message LotteryBroadcast
+{
+	required int32 tableid = 1;
+	required int32 timeout = 2;	
+    required int32 index = 3;   //开奖结果1-4青龙白虎朱雀玄武 5-8为小
+    required int32 start = 4;   //起点
+    repeated BettingZone data = 5; //每个下注区域的下注情况
+}
+
+//0x37
+//广播结算结构体
+message Balance
+{
+	required int32 tableid = 1;
+	required int32 userid = 2; 
+	required int32 userjetton = 3;	//当前玩家总下注数
+	required int32 userwin = 4;	    //当前玩家总输赢情况
+    required int32 usergold = 5;    //玩家当前金币数
+    required int32 totaljetton = 6; //所有玩家总下注数
+	required int32 dealerwin = 7;	//庄家输赢情况
+    required int32 dealergold = 8;  //庄家当前金币数
+    required int32 dealertotalwin = 9;//庄家坐庄总输赢
+    required int32 index = 10;          //开奖结果
+    required int32 timeout = 11;     //
+    repeated int32 indexlist = 12;       //开奖历史记录
+}
+
+//0x38
+//获取上庄玩家列表回复
+message ZhuangListResponse
+{
+	required int32 tableid = 1;
+	required int32 userid = 2;
+	repeated UserInfo zhuanglist = 3;
+}
+
+//0x39
+//获取游戏记录
+message GameRecordResponse
+{
+	repeated int32 record = 1; //开奖结果，1-8
+}
+
+//0x41 获取玩家数据
+message UserInfoResponse
+{
+    required int32 tableid = 1;
+    required UserInfo info = 2;
+}
+
+//通知机器人上庄 0x90
+message NotifyRobotZhuang
+{
+	required int32 tableid = 1;
+	required int32 userid = 2;
+	required int32 type = 3;//类型，1上庄，2下庄
+}
+
+//通知机器人下注 0x91
+message NotifyRobotBetting
+{
+    required int32 tableid = 1;
+    required int32 percent = 2;//参与下注机器人百分比
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

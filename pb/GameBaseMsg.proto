@@ -1,0 +1,138 @@
+package com.framework.gamebase;
+
+////////////////////////////////////////////////////////////////////////////////////
+///       以下命令都是子命令，主命令有GameType决定，即 maincmd == GameType;     //// 
+///                                                                             //// 
+////////////////////////////////////////////////////////////////////////////////////
+//客户端请求错误返回  0x10
+message ErrorMsg{
+	required int32 userid = 1;
+	required int32 errcode = 2;
+	required string errmsg = 3 [default = ""];
+	optional int32 mcmd = 4 [default = -1] ;
+	optional int32 scmd = 5 [default = -1];
+}
+
+//玩家请求进入游戏 0x11
+message EnterGameRequst {
+	required string info = 1;
+	required int32 tableid = 2 ; //桌子号
+	required int32 userid = 3; //玩家有ID
+	optional int32 privateid = 4[default = 0]; //私人房ID
+}
+
+///玩家数据
+message userdata
+{
+	required string info = 1;
+	required int32  tableid = 2; //桌子号
+	required int32  userid = 3; //玩家ID
+	required int32  status=4;  //当前玩家状态
+	required int32  seatid = 5; //玩家座位号
+}
+
+///玩家登录返回 0x11
+message EnterGameReponse  
+{
+	required int32 userid = 1;
+	required int32 gold = 2;
+	required int32 score = 3;
+	required int32 viplevel = 4;
+	required int32 status = 5;
+	required int32 seatid = 6;
+	required int32 tableid = 7;
+	required string info = 8;
+	repeated userdata users = 9;
+	optional int32 playercount = 10;
+}
+
+
+
+//广播玩家进入游戏 0x12
+message EnterGameBroadcast 
+{
+	required string info = 1;   //玩家信息 json格式
+ 	required int32  tableid = 2; //桌子号
+	required int32  userid = 3; //玩家ID
+	required int32  status=4;  //当前玩家状态
+	required int32  seatid = 5; //玩家座位号
+}
+
+//玩家准备请求 0x13
+//广播玩家准备 0x13
+message BeReadyBroadcast{
+	required int32 userid = 1; //玩家ID
+	required int32 tableid = 2; //桌子号
+}
+
+
+//用户请求坐下  0x14
+message UserSitdownRequst{
+	required int32 tableid = 1; //桌子号
+	required int32 seatid = 2; //位置id
+}
+
+//广播用户坐下 0x14
+message UserSitdownBroadcast{
+	required int32 userid = 1; //玩家ID
+	required int32 tableid = 2; //桌子号
+	required int32 seatid = 3; //位置id 
+	required string strinfo = 4[default = "{}"];
+}
+
+
+//用户请求站起  0x15
+//广播用户站起 0x15
+message UserSitupBroadcast{
+	required int32 userid = 1; //玩家ID
+	required int32 tableid = 2; //桌子号
+}
+
+//玩家请求退出游戏返回大厅请求(退出游戏房间) 0x16
+//广播玩家退出游戏返回大厅广播(退出游戏房间) 0x16
+message ExitGameBroadcast{
+	required int32 userid = 1;   //玩家ID
+	required int32 tableid = 2; //桌子号
+}
+
+//广播玩家断线 0x17
+//US_STATUS_BEGIN = -1, 
+//USER_STATUS_US_NULL 	 	=			0x00,								//没有状态
+//USER_STATUS_US_FREE		=			0x01,								//站立状态
+//USER_STATUS_US_LOOKON		=			0x02,								//旁观状态
+//USER_STATUS_US_SITUP 	 	= 			0x03,								//起立状态
+//USER_STATUS_US_SITDOWN	=			0x04,								//坐下状态
+//USER_STATUS_US_READY		=			0x05,								//同意状态
+//USER_STATUS_US_PLAYING	=			0x06,								//游戏状态
+//USER_STATUS_US_OFFLINE	=			0x07,								//断线状态
+//USER_STATUS_US_RECONNECTD =			0x08,								//玩家重连后状态
+message UserStatusBroadcast
+{
+	required int32 userid = 1;
+	required int32 userstatus = 2;
+}
+
+/// 服务器主动踢人协议0X18
+
+// 错误推送  0x19 // BASEGAME_CMD_PUSH_ERROR=0x19
+message PushErrorMsg{
+	required int32 userid = 1;
+	required int32 errcode = 2;
+	required string errmsg = 3 [default = ""];
+}
+
+///玩家请求换桌协议 0x1A
+
+
+
+// 玩家聊天 0x4F
+message UserChat
+{
+	required int32 senduserid = 1;        // 发送者    (客户端往服务器发的时候可以填0，服务器会自动填充)
+	required int32 targetuserid = 2;      // 接受者 -1表示全桌
+	required string jsoninfo = 3 [default = ""]; // 聊天类内容  表情:/?+序号, 常用语也可以当做表情发送
+}
+
+//==============================
+//其他协议
+//==============================
